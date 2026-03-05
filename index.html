@@ -3,48 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harry Potter Scar AR</title>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-face-攜帶.prod.js"></script>
+    <title>Harry Potter SVG AR</title>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-face-dot-prod.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-face-aframe.prod.js"></script>
+    
     <style>
-        body { margin: 0; overflow: hidden; }
-        #loading {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px; z-index: 10;
+        body { margin: 0; overflow: hidden; background: #000; }
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); color: #ffc500;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; font-family: serif;
         }
+        /* SVG 이미지를 데이터 URL로 변환하여 로딩 화면에 미리보기로 표시 */
+        .preview-svg { width: 100px; height: 100px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="loading">마법 주문을 거는 중... (얼굴을 비춰주세요)</div>
+    <div id="loading-screen">
+        <div class="preview-svg">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 99.68,4.81 C 47.75,4.81 5,47.02 5,100.72 C 5,153.61 47.61,195.19 99.31,195.19 C 151.75,195.19 195,152.71 195,100.72 C 195,48.79 152.66,4.81 99.68,4.81 Z M 99.31,187.91 C 51.34,187.91 11.13,149.31 11.13,100.6 C 11.13,52.23 50.23,11.09 99.68,11.09 C 148.87,11.09 188.11,50.89 188.11,100.08 C 188.11,148.79 148.45,187.91 99.31,187.91 Z" fill="#ffc500"/>
+                <path d="M 174.79,104.19 H 170.58 C 168.61,89.22 156.32,76.82 139.47,76.82 C 125.13,76.82 113.11,87.11 108.71,99.81 C 105.68,97.71 103.16,97.35 99.78,97.35 C 95.97,97.35 93.91,97.86 90.99,99.74 C 87.12,86.95 76.73,76.82 60.51,76.82 C 45.08,76.82 31.38,88.96 28.85,104.19 H 24.91 C 22.41,104.19 21.51,105.91 21.51,107.84 C 21.51,110.16 22.78,111.17 24.71,111.17 H 29.21 C 31.01,125.99 43.12,138.81 59.97,138.81 C 76.58,138.81 89.99,124.66 91.48,108.91 L 91.52,105.65 C 94.14,102.95 96.78,102.33 99.66,102.33 C 103.29,102.33 105.76,103.71 108.19,105.76 L 108.13,108.91 C 108.13,123.71 120.99,138.81 139.47,138.81 C 155.19,138.81 168.61,126.07 170.46,110.84 H 174.68 C 177.02,110.84 177.83,109.21 177.83,107.51 C 177.83,105.51 176.78,104.19 174.79,104.19 Z M 60.07,134.39 C 46.12,134.39 34.46,122.06 34.46,108.11 C 34.46,93.76 46.98,81.62 60.36,81.62 C 74.31,81.62 86.83,93.96 86.83,107.91 C 86.83,121.86 74.94,134.39 60.07,134.39 Z M 139.18,134.39 C 125.23,134.39 113.11,122.06 113.11,108.11 C 113.11,93.76 125.63,81.62 139.62,81.62 C 153.57,81.62 165.71,93.96 165.71,107.91 C 165.71,121.86 153.62,134.39 139.18,134.39 Z" fill="#ffc500"/>
+                <path d="M 70.01,30 L 83.81,54.32 L 72.68,53.21 L 78.08,71.8 L 63.61,47.21 L 74.98,48.4 L 70.01,30 Z" fill="#ffc500"/>
+            </svg>
+        </div>
+        <p>마법의 기운을 감지하는 중...</p>
+    </div>
 
-    <a-scene mindar-face="filterMinCF:0.001; filterBeta:0.01" embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-face="filterMinCF:0.001; filterBeta:0.01" 
+             embedded color-space="sRGB" 
+             renderer="colorManagement: true, physicallyCorrectLights" 
+             vr-mode-ui="enabled: false" 
+             device-orientation-permission-ui="enabled: false">
         
+        <a-assets>
+            <img id="hpLogo" src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M 99.68,4.81 C 47.75,4.81 5,47.02 5,100.72 C 5,153.61 47.61,195.19 99.31,195.19 C 151.75,195.19 195,152.71 195,100.72 C 195,48.79 152.66,4.81 99.68,4.81 Z M 99.31,187.91 C 51.34,187.91 11.13,149.31 11.13,100.6 C 11.13,52.23 50.23,11.09 99.68,11.09 C 148.87,11.09 188.11,50.89 188.11,100.08 C 188.11,148.79 148.45,187.91 99.31,187.91 Z" fill="%23ffc500"/><path d="M 174.79,104.19 H 170.58 C 168.61,89.22 156.32,76.82 139.47,76.82 C 125.13,76.82 113.11,87.11 108.71,99.81 C 105.68,97.71 103.16,97.35 99.78,97.35 C 95.97,97.35 93.91,97.86 90.99,99.74 C 87.12,86.95 76.73,76.82 60.51,76.82 C 45.08,76.82 31.38,88.96 28.85,104.19 H 24.91 C 22.41,104.19 21.51,105.91 21.51,107.84 C 21.51,110.16 22.78,111.17 24.71,111.17 H 29.21 C 31.01,125.99 43.12,138.81 59.97,138.81 C 76.58,138.81 89.99,124.66 91.48,108.91 L 91.52,105.65 C 94.14,102.95 96.78,102.33 99.66,102.33 C 103.29,102.33 105.76,103.71 108.19,105.76 L 108.13,108.91 C 108.13,123.71 120.99,138.81 139.47,138.81 C 155.19,138.81 168.61,126.07 170.46,110.84 H 174.68 C 177.02,110.84 177.83,109.21 177.83,107.51 C 177.83,105.51 176.78,104.19 174.79,104.19 Z M 60.07,134.39 C 46.12,134.39 34.46,122.06 34.46,108.11 C 34.46,93.76 46.98,81.62 60.36,81.62 C 74.31,81.62 86.83,93.96 86.83,107.91 C 86.83,121.86 74.94,134.39 60.07,134.39 Z M 139.18,134.39 C 125.23,134.39 113.11,122.06 113.11,108.11 C 113.11,93.76 125.63,81.62 139.62,81.62 C 153.57,81.62 165.71,93.96 165.71,107.91 C 165.71,121.86 153.62,134.39 139.18,134.39 Z" fill="%23ffc500"/><path d="M 70.01,30 L 83.81,54.32 L 72.68,53.21 L 78.08,71.8 L 63.61,47.21 L 74.98,48.4 L 70.01,30 Z" fill="%23ffc500"/></svg>'>
+        </a-assets>
+
         <a-camera active="false" position="0 0 0"></a-camera>
 
-        <a-entity mindar-face-target="anchorIndex: 10">
-            <a-image src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/lightning.png" 
-                     position="0 0.1 0" 
-                     width="0.3" 
-                     height="0.6" 
-                     material="transparent: true; opacity: 0.9">
+        <a-entity mindar-face-target="anchorIndex: 168">
+            <a-image src="#hpLogo" 
+                     position="0 0.1 0.1" 
+                     width="0.8" height="0.8" 
+                     material="transparent: true; alphaTest: 0.5">
             </a-image>
-            
-            <a-text value="THE BOY WHO LIVED" 
-                    position="0 0.5 0" 
-                    align="center" 
-                    color="#ffc500" 
-                    width="1.5">
-            </a-text>
         </a-entity>
+
     </a-scene>
 
     <script>
-        // 장면이 준비되면 로딩 메시지 숨김
         const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener("arReady", (event) => {
-            document.getElementById('loading').style.display = 'none';
+            document.getElementById('loading-screen').style.display = 'none';
         });
     </script>
 </body>
