@@ -1,217 +1,23 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WebAR - Click to Place Image</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #111; }
-        
-        #instructions {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            text-align: center;
-            width: 85%;
-            z-index: 5;
-            background: rgba(0,0,0,0.8);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid #444;
-        }
+<html>
+  <head>
+    <title>WebAR 가이드 - 코딩 파트너</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  </head>
 
-        #overlay {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            text-align: center;
-            pointer-events: none;
-            display: none;
-            font-size: 14px;
-        }
+  <body style="margin: 0px; overflow: hidden;">
+    <a-scene embedded arjs>
+      
+      <a-marker preset="hiro">
+        <a-box position="0 0.5 0" 
+               material="color: red; opacity: 0.8;"
+               animation="property: rotation; to: 0 360 0; loop: true; dur: 3000">
+        </a-box>
+      </a-marker>
 
-        /* AR 버튼 스타일 커스텀 */
-        #ARButton {
-            bottom: 30px !important;
-            border-radius: 8px !important;
-            background: #2196F3 !important;
-            font-weight: bold !important;
-        }
-    </style>
-</head>
-<body>
-    <div id="instructions">
-        <h2>WebAR 이미지 배치</h2>
-        <p>1. <b>Chrome(안드로이드)</b> 브라우저 권장</p>
-        <p>2. 하단의 <b>START AR</b> 버튼을 클릭하세요.</p>
-        <p style="font-size: 0.8em; color: #aaa;">(AR 미지원 기기에서는 화면 클릭 시 미리보기만 가능)</p>
-    </div>
-    <div id="overlay">바닥을 비춘 뒤 가이드가 생기면 화면을 터치하세요!</div>
-    
-    <script type="module">
-        import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/webxr/ARButton.js';
-
-        let container, camera, scene, renderer, controller, reticle;
-        let hitTestSource = null;
-        let hitTestSourceRequested = false;
-
-        // 보안 오류(CORS/CSP)를 방지하기 위해 캔버스로 이미지를 직접 생성합니다.
-        function createPlaceholderTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 256;
-            canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            
-            // 배경 그리기
-            ctx.fillStyle = '#2196F3';
-            ctx.fillRect(0, 0, 256, 256);
-            
-            // 텍스트 추가
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 40px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('AR IMAGE', 128, 120);
-            ctx.font = '30px sans-serif';
-            ctx.fillText('CLICKED', 128, 170);
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            return texture;
-        }
-
-        init();
-        animate();
-
-        function init() {
-            container = document.createElement('div');
-            document.body.appendChild(container);
-
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
-
-            const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-            light.position.set(0.5, 1, 0.25);
-            scene.add(light);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.xr.enabled = true;
-            container.appendChild(renderer.domElement);
-
-            const texture = createPlaceholderTexture();
-
-            // AR 버튼 추가
-            const arButton = ARButton.createButton(renderer, { 
-                requiredFeatures: ['hit-test'],
-                optionalFeatures: ['dom-overlay'],
-                domOverlay: { root: document.body }
-            });
-            document.body.appendChild(arButton);
-
-            // AR 세션 시작/종료 이벤트
-            renderer.xr.addEventListener('sessionstart', () => {
-                document.getElementById('instructions').style.display = 'none';
-                document.getElementById('overlay').style.display = 'block';
-            });
-            renderer.xr.addEventListener('sessionend', () => {
-                document.getElementById('instructions').style.display = 'block';
-                document.getElementById('overlay').style.display = 'none';
-            });
-
-            // 이미지 배치 함수
-            function placeImage(position, quaternion) {
-                const geometry = new THREE.PlaneGeometry(0.2, 0.2);
-                const material = new THREE.MeshBasicMaterial({ 
-                    map: texture, 
-                    transparent: true,
-                    side: THREE.DoubleSide
-                });
-                const mesh = new THREE.Mesh(geometry, material);
-                
-                if (position) mesh.position.copy(position);
-                if (quaternion) mesh.quaternion.copy(quaternion);
-                else mesh.rotation.x = -Math.PI / 2;
-
-                scene.add(mesh);
-            }
-
-            // AR 모드 터치 이벤트
-            controller = renderer.xr.getController(0);
-            controller.addEventListener('select', () => {
-                if (reticle.visible) {
-                    const position = new THREE.Vector3().setFromMatrixPosition(reticle.matrix);
-                    const quaternion = new THREE.Quaternion().setFromRotationMatrix(reticle.matrix);
-                    placeImage(position, quaternion);
-                }
-            });
-            scene.add(controller);
-
-            // 일반 브라우저(AR 미지원) 클릭 시뮬레이션
-            window.addEventListener('click', (e) => {
-                if (!renderer.xr.isPresenting) {
-                    // AR 모드가 아닐 때 화면 중앙 근처에 배치 (테스트용)
-                    placeImage(new THREE.Vector3((Math.random()-0.5)*2, (Math.random()-0.5)*2, -2));
-                }
-            });
-
-            // 가이드 링 (Reticle)
-            reticle = new THREE.Mesh(
-                new THREE.RingGeometry(0.08, 0.1, 32).rotateX(-Math.PI / 2),
-                new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-            );
-            reticle.matrixAutoUpdate = false;
-            reticle.visible = false;
-            scene.add(reticle);
-
-            window.addEventListener('resize', onWindowResize);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate() {
-            renderer.setAnimationLoop(render);
-        }
-
-        function render(timestamp, frame) {
-            if (frame) {
-                const referenceSpace = renderer.xr.getReferenceSpace();
-                const session = renderer.xr.getSession();
-
-                if (hitTestSourceRequested === false) {
-                    session.requestReferenceSpace('viewer').then((referenceSpace) => {
-                        session.requestHitTestSource({ space: referenceSpace }).then((source) => {
-                            hitTestSource = source;
-                        });
-                    });
-                    hitTestSourceRequested = true;
-                }
-
-                if (hitTestSource) {
-                    const hitTestResults = frame.getHitTestResults(hitTestSource);
-                    if (hitTestResults.length) {
-                        const hit = hitTestResults[0];
-                        reticle.visible = true;
-                        reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
-                    } else {
-                        reticle.visible = false;
-                    }
-                }
-            }
-            renderer.render(scene, camera);
-        }
-    </script>
-</body>
+      <a-entity camera></a-entity>
+      
+    </a-scene>
+  </body>
 </html>
