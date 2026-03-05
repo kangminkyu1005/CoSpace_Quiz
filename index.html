@@ -1,108 +1,69 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>MindAR Tap Place Image</title>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>WebXR 지점 표시 - 에러 방지 버전</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
 
-  <!-- A-Frame -->
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent('tap-to-place', {
+        init: function () {
+          const sceneEl = this.el;
 
-  <!-- MindAR (A-Frame plugin) -->
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+          window.addEventListener('click', (event) => {
+            // 1. 컨테이너 생성 (도형과 텍스트를 묶음)
+            const container = document.createElement('a-entity');
 
-  <style>
-    body { margin:0; overflow:hidden; }
-    .hint {
-      position: fixed; left: 12px; right: 12px; bottom: 12px;
-      padding: 10px 12px; border-radius: 10px;
-      background: rgba(0,0,0,0.55); color: #fff;
-      font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      z-index: 10;
-    }
-  </style>
-</head>
+            // 2. 배경 사각형 생성 (이미지 대신 도형 사용)
+            const bg = document.createElement('a-plane');
+            bg.setAttribute('width', '0.4');
+            bg.setAttribute('height', '0.2');
+            bg.setAttribute('color', '#3e556e'); // 남색 배경
+            bg.setAttribute('material', 'shader: flat;'); // 빛의 영향을 받지 않게 설정
+            
+            // 3. 텍스트 추가
+            const text = document.createElement('a-text');
+            text.setAttribute('value', 'POINT');
+            text.setAttribute('align', 'center');
+            text.setAttribute('width', '1.5');
+            text.setAttribute('color', 'white');
+            text.setAttribute('position', '0 0 0.01'); // 배경보다 살짝 앞에
 
-<body>
-  <div class="hint">
-    1) 카메라 권한 허용<br>
-    2) 타겟 이미지를 비추면 앵커가 잡힘<br>
-    3) 화면을 터치하면 그 위치에 이미지가 생성됨
-  </div>
+            container.appendChild(bg);
+            container.appendChild(text);
 
-  <a-scene
-    mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/targets.mind;
-                 autoStart: true; uiScanning: true; uiError: true;"
-    color-space="sRGB"
-    renderer="colorManagement: true; physicallyCorrectLights: false;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-  >
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+            // 4. 위치 계산 (카메라 앞 1.5미터)
+            const cameraEl = document.querySelector('[camera]');
+            const cameraOrbit = cameraEl.object3D;
+            const position = new THREE.Vector3(0, 0, -1.5);
+            position.applyQuaternion(cameraOrbit.quaternion);
+            position.add(cameraOrbit.position);
 
-    <!-- 타겟(마커/이미지) 0번을 인식했을 때의 기준 앵커 -->
-    <a-entity id="anchor" mindar-image-target="targetIndex: 0">
-      <!-- 터치 위치 계산용 '보이지 않는' 평면(타겟 위 바닥 역할) -->
-      <a-plane id="hitPlane" width="1.2" height="1.2"
-               position="0 0 0" rotation="0 0 0"
-               material="transparent:true; opacity:0.0"
-               class="clickable">
-      </a-plane>
-    </a-entity>
-  </a-scene>
+            container.setAttribute('position', position);
+            container.setAttribute('look-at', '[camera]');
 
-  <script>
-    // === 설정 ===
-    // 생성할 "테스트 이미지" (원하는 PNG로 바꿔도 됨)
-    const STICKER_URL = "https://threejs.org/examples/textures/uv_grid_opengl.jpg";
-    const STICKER_SIZE = 0.18; // 타겟 위에서의 크기(단위: 미터 비슷한 스케일)
+            sceneEl.appendChild(container);
+            console.log("지점이 생성되었습니다:", position);
+          });
+        }
+      });
+    </script>
+  </head>
 
-    const sceneEl = document.querySelector("a-scene");
-    const anchorEl = document.getElementById("anchor");
-    const planeEl  = document.getElementById("hitPlane");
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene 
+      webxr="optionalFeatures: hit-test;" 
+      ar-mode-ui="enabled: true"
+      renderer="antialias: true; alpha: true; logarithmicDepthBuffer: true;"
+      tap-to-place>
+      
+      <a-light type="ambient" intensity="1"></a-light>
+      <a-entity camera position="0 1.6 0" look-controls></a-entity>
 
-    // Three.js Raycaster
-    const raycaster = new THREE.Raycaster();
-    const mouseNdc = new THREE.Vector2();
-
-    // 터치/클릭 이벤트 (모바일/PC 모두)
-    window.addEventListener("pointerdown", (e) => {
-      // 타겟이 아직 인식되지 않았으면 배치 불가
-      if (!anchorEl.object3D.visible) return;
-
-      // 화면좌표 → NDC(-1~1)
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      mouseNdc.x = (e.clientX / w) * 2 - 1;
-      mouseNdc.y = -(e.clientY / h) * 2 + 1;
-
-      // A-Frame 카메라
-      const camera = sceneEl.camera;
-      if (!camera) return;
-
-      raycaster.setFromCamera(mouseNdc, camera);
-
-      // hitPlane(타겟 위 평면)과 교차점 계산
-      const planeObj = planeEl.getObject3D("mesh");
-      if (!planeObj) return;
-
-      const hits = raycaster.intersectObject(planeObj, true);
-      if (!hits || hits.length === 0) return;
-
-      const p = hits[0].point; // 월드 좌표 교차점
-
-      // 월드좌표 → anchor 로컬좌표로 변환해서, 타겟에 "붙어있게" 만들기
-      const localP = anchorEl.object3D.worldToLocal(p.clone());
-
-      // 스티커 엔티티 생성
-      const sticker = document.createElement("a-plane");
-      sticker.setAttribute("width", STICKER_SIZE);
-      sticker.setAttribute("height", STICKER_SIZE);
-      sticker.setAttribute("position", `${localP.x} ${localP.y} ${localP.z + 0.001}`); // z-fighting 방지로 살짝 띄움
-      sticker.setAttribute("rotation", "0 0 0");
-      sticker.setAttribute("material", `src:${STICKER_URL}; transparent:true;`);
-      anchorEl.appendChild(sticker);
-    });
-  </script>
-</body>
+      <div style="position: fixed; bottom: 30px; width: 100%; text-align: center; z-index: 10; color: white; text-shadow: 1px 1px 2px black;">
+        화면을 터치하면 그 자리에 표시가 생성됩니다!
+      </div>
+    </a-scene>
+  </body>
 </html>
