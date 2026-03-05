@@ -1,149 +1,50 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Face AR Demo</title>
-
-<script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-face-aframe.prod.js"></script>
-
-<style>
-
-body{
-margin:0;
-overflow:hidden;
-background:black;
-}
-
-#status{
-position:fixed;
-top:10px;
-left:10px;
-z-index:1000;
-background:rgba(0,0,0,0.7);
-color:#00ff88;
-padding:8px 12px;
-border-radius:5px;
-font-size:12px;
-font-family:monospace;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harry Potter Face AR</title>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-face-攜帶.prod.js"></script>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-face-aframe.prod.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #loading {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px; z-index: 10;
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="status">AR 준비중...</div>
+    <div id="loading">지팡이를 준비 중... (얼굴을 비춰주세요)</div>
 
-<a-scene
+    <a-scene mindar-face="filterMinCF:0.001; filterBeta:0.01" embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        
+        <a-camera active="false" position="0 0 0"></a-camera>
 
-mindar-face="
-autoStart:true;
-filterMinCF:0.01;
-filterBeta:0.1;
-maxTrack:1
-"
+        <a-entity mindar-face-target="anchorIndex: 10">
+            <a-text value="HARRY POTTER" 
+                    position="0 0.6 0" 
+                    align="center" 
+                    color="#ffc500" 
+                    width="2"
+                    font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+            </a-text>
+            <a-entity geometry="primitive: plane; width: 0.2; height: 0.4" 
+                      material="color: #ffc500; shader: flat" 
+                      position="0 0.3 0"
+                      animation="property: scale; to: 1.2 1.2 1.2; dir: alternate; dur: 500; loop: true">
+            </a-entity>
+        </a-entity>
+    </a-scene>
 
-embedded
-
-renderer="
-precision: mediump;
-antialias:false;
-colorManagement:true
-"
-
-vr-mode-ui="enabled:false"
-device-orientation-permission-ui="enabled:false"
-
->
-
-<a-camera position="0 0 0"></a-camera>
-
-
-<!-- 얼굴 이마 위치 -->
-<a-entity id="faceAnchor" mindar-face-target="anchorIndex:9">
-
-<!-- 위치 보정 -->
-<a-entity position="0 -0.05 0.25">
-
-<a-image
-src="./scar.png"
-width="0.35"
-height="0.6"
-material="transparent:true; side:double">
-</a-image>
-
-<a-text
-value="THE BOY WHO LIVED"
-position="0 0.45 0"
-align="center"
-color="#ffc500"
-width="2">
-</a-text>
-
-</a-entity>
-
-</a-entity>
-
-</a-scene>
-
-
-<script>
-
-const status = document.getElementById("status");
-const scene = document.querySelector("a-scene");
-const face = document.querySelector("#faceAnchor");
-
-
-// AR 준비 완료
-scene.addEventListener("arReady", ()=>{
-
-status.innerText="얼굴을 카메라에 비춰주세요";
-
-});
-
-
-// 얼굴 감지
-face.addEventListener("targetFound", ()=>{
-
-status.innerText="얼굴 감지됨";
-
-});
-
-
-// 얼굴 사라짐
-face.addEventListener("targetLost", ()=>{
-
-status.innerText="얼굴을 찾는 중";
-
-});
-
-
-// 오류 발생
-scene.addEventListener("arError", ()=>{
-
-status.innerText="카메라 권한 또는 HTTPS 확인";
-
-});
-
-
-
-// ⚠️ 핵심: WebGL resize 문제 해결
-scene.addEventListener("loaded", ()=>{
-
-setTimeout(()=>{
-
-window.dispatchEvent(new Event("resize"));
-
-},500);
-
-});
-
-</script>
-
+    <script>
+        // 장면이 로드되면 로딩 메시지 숨김
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.addEventListener("arReady", (event) => {
+            document.getElementById('loading').style.display = 'none';
+        });
+    </script>
 </body>
 </html>
