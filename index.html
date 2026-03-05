@@ -1,69 +1,51 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>WebXR 지점 표시 - 에러 방지 버전</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script>
-      AFRAME.registerComponent('tap-to-place', {
-        init: function () {
-          const sceneEl = this.el;
+<title>MindAR Test</title>
 
-          window.addEventListener('click', (event) => {
-            // 1. 컨테이너 생성 (도형과 텍스트를 묶음)
-            const container = document.createElement('a-entity');
+<!-- 1️⃣ AFRAME -->
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
-            // 2. 배경 사각형 생성 (이미지 대신 도형 사용)
-            const bg = document.createElement('a-plane');
-            bg.setAttribute('width', '0.4');
-            bg.setAttribute('height', '0.2');
-            bg.setAttribute('color', '#3e556e'); // 남색 배경
-            bg.setAttribute('material', 'shader: flat;'); // 빛의 영향을 받지 않게 설정
-            
-            // 3. 텍스트 추가
-            const text = document.createElement('a-text');
-            text.setAttribute('value', 'POINT');
-            text.setAttribute('align', 'center');
-            text.setAttribute('width', '1.5');
-            text.setAttribute('color', 'white');
-            text.setAttribute('position', '0 0 0.01'); // 배경보다 살짝 앞에
+<!-- 2️⃣ MindAR -->
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-            container.appendChild(bg);
-            container.appendChild(text);
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+}
+</style>
+</head>
 
-            // 4. 위치 계산 (카메라 앞 1.5미터)
-            const cameraEl = document.querySelector('[camera]');
-            const cameraOrbit = cameraEl.object3D;
-            const position = new THREE.Vector3(0, 0, -1.5);
-            position.applyQuaternion(cameraOrbit.quaternion);
-            position.add(cameraOrbit.position);
+<body>
 
-            container.setAttribute('position', position);
-            container.setAttribute('look-at', '[camera]');
+<a-scene
+mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/targets.mind;"
+color-space="sRGB"
+renderer="colorManagement: true; physicallyCorrectLights: false;"
+vr-mode-ui="enabled: false"
+device-orientation-permission-ui="enabled: false"
+>
 
-            sceneEl.appendChild(container);
-            console.log("지점이 생성되었습니다:", position);
-          });
-        }
-      });
-    </script>
-  </head>
+<a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <body style="margin: 0; overflow: hidden;">
-    <a-scene 
-      webxr="optionalFeatures: hit-test;" 
-      ar-mode-ui="enabled: true"
-      renderer="antialias: true; alpha: true; logarithmicDepthBuffer: true;"
-      tap-to-place>
-      
-      <a-light type="ambient" intensity="1"></a-light>
-      <a-entity camera position="0 1.6 0" look-controls></a-entity>
+<a-entity mindar-image-target="targetIndex: 0">
 
-      <div style="position: fixed; bottom: 30px; width: 100%; text-align: center; z-index: 10; color: white; text-shadow: 1px 1px 2px black;">
-        화면을 터치하면 그 자리에 표시가 생성됩니다!
-      </div>
-    </a-scene>
-  </body>
+<a-plane
+src="https://threejs.org/examples/textures/uv_grid_opengl.jpg"
+width="0.5"
+height="0.5"
+position="0 0 0"
+rotation="0 0 0"
+>
+</a-plane>
+
+</a-entity>
+
+</a-scene>
+
+</body>
 </html>
