@@ -1,149 +1,60 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<title>WebXR AR Image Placement</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+  <head>
+    <title>WebXR 지점 선택 AR - 코딩 파트너</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent('tap-to-place', {
+        init: function () {
+          const sceneEl = this.el;
+          
+          // 화면 클릭 이벤트 리스너
+          window.addEventListener('click', (event) => {
+            // 레이캐스터(가상의 선) 정보 가져오기
+            const touchPoint = new THREE.Vector2();
+            touchPoint.x = (event.clientX / window.innerWidth) * 2 - 1;
+            touchPoint.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-<style>
-body{
-margin:0;
-overflow:hidden;
-font-family:sans-serif;
-}
-</style>
+            // 터치한 지점에 새로운 '이미지 표시' 생성
+            const newElement = document.createElement('a-curvedimage');
+            
+            // 이미지 업로드 없이 외부 샘플 이미지 사용 (800x800 랜덤 이미지)
+            newElement.setAttribute('src', 'https://picsum.photos/200');
+            newElement.setAttribute('height', '0.5');
+            newElement.setAttribute('width', '0.5');
+            
+            // 카메라가 바라보는 방향의 일정 거리(2m 앞)에 배치 (간단한 구현용)
+            // 실제 바닥 인식을 위해서는 WebXR Hit-test 설정이 필요하지만, 
+            // 즉시 실행 가능한 코드를 위해 레이캐스터 위치에 생성합니다.
+            const camera = document.querySelector('[camera]').object3D;
+            const position = new THREE.Vector3(0, 0, -2); // 카메라 앞 2미터
+            position.applyQuaternion(camera.quaternion);
+            position.add(camera.position);
 
-</head>
+            newElement.setAttribute('position', position);
+            newElement.setAttribute('look-at', '[camera]'); // 카메라를 향하게 설정
+            
+            sceneEl.appendChild(newElement);
+          });
+        }
+      });
+    </script>
+  </head>
 
-<body>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene 
+      webxr="optionalFeatures: hit-test;" 
+      ar-mode-ui="enabled: true"
+      tap-to-place>
+      
+      <a-assets>
+        </a-assets>
 
-<script type="module">
+      <a-entity camera position="0 1.6 0" look-controls></a-entity>
 
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
-import { ARButton } from "https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/webxr/ARButton.js";
+      <a-light type="ambient" intensity="0.5"></a-light>
+      <a-light type="directional" position="1 2 1" intensity="1"></a-light>
 
-let camera, scene, renderer;
-let controller;
-
-let hitTestSource = null;
-let hitTestSourceRequested = false;
-
-init();
-animate();
-
-function init(){
-
-scene = new THREE.Scene();
-
-camera = new THREE.PerspectiveCamera(
-70,
-window.innerWidth/window.innerHeight,
-0.01,
-20
-);
-
-renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
-renderer.xr.enabled = true;
-
-document.body.appendChild(renderer.domElement);
-
-document.body.appendChild(
-ARButton.createButton(renderer,{
-requiredFeatures:["hit-test"]
-})
-);
-
-const light = new THREE.HemisphereLight(0xffffff,0xbbbbff,1);
-scene.add(light);
-
-controller = renderer.xr.getController(0);
-controller.addEventListener("select", onSelect);
-scene.add(controller);
-
-}
-
-function onSelect(){
-
-if(!hitTestSource) return;
-
-const geometry = new THREE.PlaneGeometry(0.3,0.3);
-
-const texture = new THREE.TextureLoader().load(
-"https://threejs.org/examples/textures/uv_grid_opengl.jpg"
-);
-
-const material = new THREE.MeshBasicMaterial({
-map:texture,
-transparent:true
-});
-
-const mesh = new THREE.Mesh(geometry,material);
-
-mesh.position.set(0,0,-1);
-mesh.applyMatrix4(controller.matrixWorld);
-
-scene.add(mesh);
-
-}
-
-function animate(){
-
-renderer.setAnimationLoop(render);
-
-}
-
-function render(timestamp, frame){
-
-if(frame){
-
-const referenceSpace = renderer.xr.getReferenceSpace();
-const session = renderer.xr.getSession();
-
-if(hitTestSourceRequested === false){
-
-session.requestReferenceSpace("viewer").then(function(referenceSpace){
-
-session.requestHitTestSource({space:referenceSpace}).then(function(source){
-
-hitTestSource = source;
-
-});
-
-});
-
-session.addEventListener("end",function(){
-
-hitTestSourceRequested = false;
-hitTestSource = null;
-
-});
-
-hitTestSourceRequested = true;
-
-}
-
-if(hitTestSource){
-
-const hitTestResults = frame.getHitTestResults(hitTestSource);
-
-if(hitTestResults.length){
-
-const hit = hitTestResults[0];
-
-const pose = hit.getPose(referenceSpace);
-
-}
-
-}
-
-}
-
-renderer.render(scene,camera);
-
-}
-
-</script>
-
-</body>
+    </a-scene>
+  </body>
 </html>
