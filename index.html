@@ -1,140 +1,74 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Harry Potter Face AR</title>
-
-<script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-face-aframe.prod.js"></script>
-
-<style>
-
-body{
-margin:0;
-overflow:hidden;
-background:black;
-}
-
-#status-log{
-position:fixed;
-top:10px;
-left:10px;
-z-index:1000;
-padding:10px;
-border-radius:5px;
-background:rgba(0,0,0,0.8);
-color:#ffc500;
-font-family:monospace;
-font-size:12px;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harry Potter Face AR - Fixed</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-face-aframe.prod.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: black; }
+        #status-log {
+            position: fixed; top: 10px; left: 10px; z-index: 1000;
+            padding: 10px; border-radius: 5px; background: rgba(0,0,0,0.8);
+            color: #ffc500; font-family: monospace; font-size: 12px;
+        }
+    </style>
 </head>
-
 <body>
 
 <div id="status-log">얼굴 인식 준비 중...</div>
 
-<a-scene
+<a-scene 
+    mindar-face="filterMinCF:0.01; filterBeta:0.1; maxTrack:1; uiScanning:false"
+    embedded 
+    renderer="colorManagement: true; physicallyCorrectLights: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
 
-mindar-face="
-filterMinCF:0.01;
-filterBeta:0.1;
-maxTrack:1;
-uiScanning:false
-"
+    <a-assets>
+        <img id="scar" src="scar.png" crossorigin="anonymous">
+    </a-assets>
 
-embedded
+    <a-camera position="0 0 0"></a-camera>
 
-renderer="
-precision: mediump;
-colorManagement:true;
-physicallyCorrectLights:true
-"
+    <a-entity id="faceTarget" mindar-face-target="anchorIndex: 9">
+        <a-entity position="0 -0.05 0.25">
+            <a-image 
+                src="#scar" 
+                width="0.35" 
+                height="0.6"
+                material="transparent: true; alphaTest: 0.5; side: double; shader: flat">
+            </a-image>
 
-vr-mode-ui="enabled:false"
-device-orientation-permission-ui="enabled:false"
-
->
-
-<a-assets>
-
-<!-- PNG 이미지 사용 -->
-<img id="scar" src="scar.png">
-
-</a-assets>
-
-
-<a-camera position="0 0 0"></a-camera>
-
-
-<!-- 얼굴 이마 위치 -->
-<a-entity id="faceTarget" mindar-face-target="anchorIndex:9">
-
-<!-- 위치 보정 -->
-<a-entity position="0 -0.05 0.25">
-
-<a-image
-src="#scar"
-width="0.35"
-height="0.6"
-material="transparent:true; side:double">
-</a-image>
-
-<a-text
-value="THE BOY WHO LIVED"
-position="0 0.45 0"
-align="center"
-color="#ffc500"
-width="2">
-</a-text>
-
-</a-entity>
-
-</a-entity>
-
+            <a-text 
+                value="THE BOY WHO LIVED" 
+                position="0 0.45 0" 
+                align="center" 
+                color="#ffc500" 
+                width="2">
+            </a-text>
+        </a-entity>
+    </a-entity>
 </a-scene>
 
 <script>
+    const log = document.getElementById("status-log");
+    const scene = document.querySelector("a-scene");
+    const target = document.querySelector("#faceTarget");
 
-const log=document.getElementById("status-log");
-const scene=document.querySelector("a-scene");
-const target=document.querySelector("#faceTarget");
+    scene.addEventListener("arReady", () => {
+        log.innerText = "얼굴을 카메라에 비춰주세요";
+        log.style.color = "#4CAF50";
+    });
 
-
-scene.addEventListener("arReady",()=>{
-
-log.innerText="얼굴을 카메라에 비춰주세요";
-log.style.color="#4CAF50";
-
-});
-
-
-target.addEventListener("targetFound",()=>{
-
-log.innerText="얼굴 감지됨";
-
-});
-
-
-target.addEventListener("targetLost",()=>{
-
-log.innerText="얼굴을 찾는 중...";
-
-});
-
-
-scene.addEventListener("arError",()=>{
-
-log.innerText="카메라 권한 또는 HTTPS 환경을 확인하세요";
-log.style.color="#ff5252";
-
-});
-
+    target.addEventListener("targetFound", () => { log.innerText = "얼굴 감지됨"; });
+    target.addEventListener("targetLost", () => { log.innerText = "얼굴을 찾는 중..."; });
+    
+    scene.addEventListener("arError", (event) => {
+        log.innerText = "에러 발생: HTTPS 환경인지 확인하세요";
+        log.style.color = "#ff5252";
+    });
 </script>
 
 </body>
