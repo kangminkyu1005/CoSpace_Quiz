@@ -5,31 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Harry Potter Face AR</title>
 
-<!-- AFRAME -->
 <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-
-<!-- MINDAR FACE -->
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-face-aframe.prod.js"></script>
 
 <style>
+
 body{
-    margin:0;
-    overflow:hidden;
-    background:black;
+margin:0;
+overflow:hidden;
+background:black;
 }
 
 #status-log{
-    position:fixed;
-    top:10px;
-    left:10px;
-    z-index:1000;
-    padding:10px;
-    border-radius:5px;
-    background:rgba(0,0,0,0.8);
-    color:#ffc500;
-    font-family:monospace;
-    font-size:12px;
+position:fixed;
+top:10px;
+left:10px;
+z-index:1000;
+padding:10px;
+border-radius:5px;
+background:rgba(0,0,0,0.8);
+color:#ffc500;
+font-family:monospace;
+font-size:12px;
 }
+
 </style>
 
 </head>
@@ -49,27 +48,26 @@ device-orientation-permission-ui="enabled:false"
 
 <a-assets>
 
-<!-- PNG 이미지 사용 권장 -->
-<img id="scar" src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/lightning.png">
+<img id="hpLogo" src="data:image/svg+xml;base64,
+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHBhdGggZD0iTTk5LjY4IDQuODFDNDcuNzUgNC44MSA1IDQ3LjAyIDUgMTAwLjcyYzAgNTIuODkgNDIuNjEgOTQuNDcgOTQuMzEgOTQuNDcgNTIuNDQgMCA5NS42OS00Mi40OCA5NS42OS05NC40NyAwLTUxLjkzLTQyLjM0LTk1LjkxLTk1LjMyLTk1Ljkxem0tLjM3IDE4My4xYy00Ny45NyAwLTg4LjE4LTM4LjYtODguMTgtODcuMzEgMC00OC4zNyAzOS4xLTg5LjUxIDg4LjU1LTg5LjUxIDQ5LjE5IDAgODguNDMgMzkuOCA4OC40MyA4OC45OSAwIDQ4LjcxLTM5LjY2IDg3LjgzLTg4LjggODcuODN6IiBmaWxsPSIjZmZjNTAwIi8+PC9zdmc+">
 
 </a-assets>
 
 <a-camera position="0 0 0"></a-camera>
 
-<!-- 얼굴 앵커 (이마 위치) -->
 <a-entity id="faceTarget" mindar-face-target="anchorIndex:10">
 
 <a-image
-src="#scar"
-position="0 0.15 0.3"
-width="0.35"
-height="0.6"
-material="transparent:true"
+src="#hpLogo"
+position="0 0.15 0.35"
+width="0.7"
+height="0.7"
+material="transparent:true; side:double"
 ></a-image>
 
 <a-text
 value="THE BOY WHO LIVED"
-position="0 0.45 0.3"
+position="0 0.55 0.35"
 align="center"
 color="#ffc500"
 width="2"
@@ -86,32 +84,36 @@ const scene = document.querySelector("a-scene");
 const target = document.querySelector("#faceTarget");
 
 /* AR 준비 완료 */
-scene.addEventListener("arReady", () => {
 
-log.innerText = "AR 준비 완료 ✔ 얼굴을 비춰주세요";
-log.style.color = "#4CAF50";
+scene.addEventListener("arReady", ()=>{
+
+log.innerText="AR 준비 완료 ✔ 얼굴을 비춰주세요";
+log.style.color="#4CAF50";
 
 });
 
 /* 얼굴 감지 */
-target.addEventListener("targetFound", () => {
 
-log.innerText = "얼굴 감지됨 ✨";
+target.addEventListener("targetFound", ()=>{
+
+log.innerText="얼굴 감지됨 ✨";
 
 });
 
 /* 얼굴 사라짐 */
-target.addEventListener("targetLost", () => {
 
-log.innerText = "얼굴을 찾는 중...";
+target.addEventListener("targetLost", ()=>{
+
+log.innerText="얼굴을 찾는11 중...";
 
 });
 
-/* 오류 발생 */
-scene.addEventListener("arError", () => {
+/* 오류 */
 
-log.innerText = "카메라 권한 또는 HTTPS를 확인하세요";
-log.style.color = "#ff5252";
+scene.addEventListener("arError", ()=>{
+
+log.innerText="카메라 권한 또는 HTTPS를 확인하세요";
+log.style.color="#ff5252";
 
 });
 
