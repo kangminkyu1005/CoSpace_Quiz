@@ -1,73 +1,121 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harry Potter AR Fix</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-face-aframe.prod.js"></script>
-    
-    <style>
-        body { margin: 0; overflow: hidden; background: #000; }
-        #status-log {
-            position: fixed; top: 10px; left: 10px; z-index: 1000;
-            padding: 10px; border-radius: 5px; background: rgba(0,0,0,0.8);
-            color: #ffc500; font-family: monospace; font-size: 12px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harry Potter Face AR</title>
+
+<!-- AFRAME -->
+<script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+
+<!-- MINDAR FACE -->
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-face-aframe.prod.js"></script>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+}
+
+#status-log{
+    position:fixed;
+    top:10px;
+    left:10px;
+    z-index:1000;
+    padding:10px;
+    border-radius:5px;
+    background:rgba(0,0,0,0.8);
+    color:#ffc500;
+    font-family:monospace;
+    font-size:12px;
+}
+</style>
+
 </head>
+
 <body>
 
-    <div id="status-log">시스템 초기화 중...</div>
+<div id="status-log">시스템 초기화 중...</div>
 
-    <a-scene 
-        mindar-face="filterMinCF:0.001; filterBeta:0.01" 
-        embedded 
-        color-space="sRGB" 
-        renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false">
-        
-        <a-assets>
-            <img id="hpLogo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHBhdGggZD0iTTk5LjY4IDQuODFDNDcuNzUgNC44MSA1IDQ3LjAyIDUgMTAwLjcyYzAgNTIuODkgNDIuNjEgOTQuNDcgOTQuMzEgOTQuNDcgNTIuNDQgMCA5NS42OS00Mi40OCA5NS42OS05NC40NyAwLTUxLjkzLTQyLjM0LTk1LjkxLTk1LjMyLTk1Ljkxem0tLjM3IDE4My4xYy00Ny45NyAwLTg4LjE4LTM4LjYtODguMTgtODcuMzEgMC00OC4zNyAzOS4xLTg5LjUxIDg4LjU1LTg5LjUxIDQ5LjE5IDAgODguNDMgMzkuOCA4OC40MyA4OC45OSAwIDQ4LjcxLTM5LjY2IDg3LjgzLTg4LjggODcuODN6IiBmaWxsPSIjZmZjNTAwIi8+PHBhdGggZD0iTTE3NC43OSAxMDQuMTloLTQuMjFjLTEuOTctMTQuOTctMTIuMjYtMjcuMzctMjkuMTEtMjcuMzctMTQuMzQgMC0yNi4zNiAxMC4yOS0zMC43NiAyMi45OS0zLjAzLTIuMS01LjU1LTIuNDYtOC45My0yLjQ2LTMuODEgMC01Ljg3LjUxLTguNzkgMi4zOS0zLjg3LTEyLjc5LTE0LjI2LTIyLjkyLTMwLjQ4LTIyLjkyLTE1LjQzIDAtMjkuMTMgMTIuMTQtMzEuNjYgMjcuMzdIMjQuOTFjLTIuNSAwLTMuNCAxLjcyLTMuNCAzLjY1IDAgMi4zMiAxLjI3IDMuMzMgMy4yIDMuMzNoNC41YzEuOCAxNC44MiAxMy45MSAyNy42NCAzMC43NiAyNy42NCAxNi42MSAwIDMwLjAyLTE0LjE1IDMxLjUxLTI5LjlsLjA0LTMuMjZjMi42Mi0yLjcgNS4yNi0zLjMyIDguMTQtMy4zMiAzLjYzIDAgNi4xIDEuMzggOC41MyAzLjQzbC0uMDYgMy4xNWMwIDE0LjggMTIuODYgMjkuOSAzMS4zNCAyOS45IDE1LjcyIDAgMjkuMTQtMTIuNzQgMzAuOTktMjcuOTdoNC4yMmMyLjM0IDAgMy4xNS0xLjYzIDMuMTUtMy4zMyAwLTItMS4wNS0zLjMyLTMuMDQtMy4zMnpNNjAuMDcgMTM0LjM5Yy0xMy45NSAwLTI1LjYxLTEyLjMzLTI1LjYxLTI2LjI4IDAtMTQuMzUgMTIuNTItMjYuNDkgMjUuOS0yNi40OSAxMy45NSAwIDI2LjQ3IDEyLjM0IDI2LjQ3IDI2LjI5cy0xMS44OSAyNi40OC0yNi43NiAyNi40OHptNzkuMTEgMGMtMTMuOTUgMC0yNi4wNy0xMi4zMy0yNi4wNy0yNi4yOCAwLTE0LjM1IDEyLjUyLTI2LjQ5IDE2LjUxLTI2LjQ5IDEzLjk1IDAgMjYuMDkgMTIuMzQgMjYuMDkgMjYuMjlzLTEyLjA5IDI2LjQ4LTI2LjUzIDI2LjQ4ek03MC4wMSAzMGwxMy44IDI0LjMyLTExLjEzLTEuMTEgNS40IDE4LjU5LTE0LjQ3LTI0LjU5IDExLjM3IDEuMTlMNzAuMDEgMzB6IiBmaWxsPSIjZmZjNTAwIi8+PC9zdmc+">
-        </a-assets>
+<a-scene
+mindar-face="filterMinCF:0.001; filterBeta:0.01"
+embedded
+color-space="sRGB"
+renderer="colorManagement:true, physicallyCorrectLights"
+vr-mode-ui="enabled:false"
+device-orientation-permission-ui="enabled:false"
+>
 
-        <a-camera active="false" position="0 0 0"></a-camera>
+<a-assets>
 
-        <a-entity mindar-face-target="anchorIndex: 168">
-            <a-image 
-                src="#hpLogo" 
-                position="0 0.1 0.1" 
-                width="0.8" height="0.8" 
-                material="transparent: true; alphaTest: 0.5">
-            </a-image>
-        </a-entity>
+<!-- PNG 이미지 사용 권장 -->
+<img id="scar" src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/lightning.png">
 
-    </a-scene>
+</a-assets>
 
-    <script>
-        const log = document.getElementById('status-log');
-        const sceneEl = document.querySelector('a-scene');
+<a-camera position="0 0 0"></a-camera>
 
-        // 라이브러리 로드 상태 확인
-        sceneEl.addEventListener("arReady", () => {
-            log.innerText = "상태: 마법 준비 완료 (얼굴을 비춰주세요)";
-            log.style.color = "#4CAF50";
-        });
+<!-- 얼굴 앵커 (이마 위치) -->
+<a-entity id="faceTarget" mindar-face-target="anchorIndex:10">
 
-        // 얼굴 감지 이벤트
-        sceneEl.addEventListener("targetFound", () => {
-            log.innerText = "상태: 얼굴 감지됨! ✨";
-        });
+<a-image
+src="#scar"
+position="0 0.15 0.3"
+width="0.35"
+height="0.6"
+material="transparent:true"
+></a-image>
 
-        sceneEl.addEventListener("targetLost", () => {
-            log.innerText = "상태: 얼굴을 찾는 중...";
-        });
+<a-text
+value="THE BOY WHO LIVED"
+position="0 0.45 0.3"
+align="center"
+color="#ffc500"
+width="2"
+></a-text>
 
-        sceneEl.addEventListener("arError", (e) => {
-            log.innerText = "에러: 카메라 권한이나 HTTPS를 확인하세요.";
-            log.style.color = "#FF5252";
-        });
-    </script>
+</a-entity>
+
+</a-scene>
+
+<script>
+
+const log = document.getElementById("status-log");
+const scene = document.querySelector("a-scene");
+const target = document.querySelector("#faceTarget");
+
+/* AR 준비 완료 */
+scene.addEventListener("arReady", () => {
+
+log.innerText = "AR 준비 완료 ✔ 얼굴을 비춰주세요";
+log.style.color = "#4CAF50";
+
+});
+
+/* 얼굴 감지 */
+target.addEventListener("targetFound", () => {
+
+log.innerText = "얼굴 감지됨 ✨";
+
+});
+
+/* 얼굴 사라짐 */
+target.addEventListener("targetLost", () => {
+
+log.innerText = "얼굴을 찾는 중...";
+
+});
+
+/* 오류 발생 */
+scene.addEventListener("arError", () => {
+
+log.innerText = "카메라 권한 또는 HTTPS를 확인하세요";
+log.style.color = "#ff5252";
+
+});
+
+</script>
+
 </body>
 </html>
