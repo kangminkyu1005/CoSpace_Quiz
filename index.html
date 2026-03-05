@@ -1,74 +1,74 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>카메라 실행 및 지점 고정 해결</title>
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+<head>
+  <meta charset="utf-8">
+  <title>손가락 마법 AR</title>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas.output_canvas { position: fixed; top: 0; left: 0; z-index: -1; width: 100vw; height: 100vh; object-fit: cover; }
+    #guide { position: fixed; top: 10px; width: 100%; text-align: center; color: yellow; z-index: 10; font-family: sans-serif; text-shadow: 2px 2px 2px black; }
+  </style>
+</head>
+<body>
+  <div id="guide">검지 손가락을 펴서 마법 구체를 조종하세요!</div>
+  
+  <video id="input_video" style="display:none;"></video>
+  
+  <a-scene embedded vr-mode-ui="enabled: false">
+    <a-sphere id="magic-ball" radius="0.05" color="#FF8C00" material="emissive: #FF4500; emissiveIntensity: 2; shader: flat" visible="false"></a-sphere>
+    
+    <a-entity camera position="0 0 0"></a-entity>
+    <a-light type="ambient" intensity="1.5"></a-light>
+  </a-scene>
 
-    <script>
-      AFRAME.registerComponent('ar-logic', {
-        init: function () {
-          const sceneEl = this.el;
-          this.reticle = document.querySelector('#reticle');
+  <script>
+    const videoElement = document.getElementById('input_video');
+    const magicBall = document.getElementById('magic-ball');
 
-          // 클릭 시 공 생성 로직
-          window.addEventListener('click', () => {
-            const worldPos = new THREE.Vector3();
-            // 1. 조준점의 현재 '세계 좌표'를 가져옴
-            this.reticle.object3D.getWorldPosition(worldPos);
+    // MediaPipe Hands 설정
+    const hands = new Hands({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
 
-            const sphere = document.createElement('a-sphere');
-            sphere.setAttribute('radius', '0.1');
-            sphere.setAttribute('color', '#FF4500');
-            // 2. 카메라의 자식이 아닌 '장면(Scene)'에 바로 추가하여 좌표 고정
-            sphere.setAttribute('position', worldPos);
-            sphere.setAttribute('material', 'shader: flat;');
-            
-            sceneEl.appendChild(sphere);
-            console.log("공 고정 생성:", worldPos);
-          });
-        },
-        tick: function () {
-          // 조준점을 카메라 앞 1.5m 공간에 계속 투영 (추적 효과)
-          const cameraObj = document.querySelector('[camera]').object3D;
-          const vector = new THREE.Vector3(0, 0, -1.5);
-          vector.applyQuaternion(cameraObj.quaternion);
-          vector.add(cameraObj.position);
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
 
-          if (this.reticle) {
-            this.reticle.object3D.position.copy(vector);
-          }
-        }
-      });
-    </script>
-    <style>
-      /* 카메라 피드가 보일 수 있도록 배경 투명화 */
-      body { margin: 0; overflow: hidden; }
-      #ui {
-        position: fixed; top: 10px; width: 100%; text-align: center;
-        z-index: 1000; color: #00FF00; font-family: sans-serif;
-        background: rgba(0,0,0,0.4); padding: 5px;
+    hands.onResults((results) => {
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const landmarks = results.multiHandLandmarks[0];
+        
+        // 8번 랜드마크: 검지 손가락 끝 (Index Finger Tip)
+        const indexTip = landmarks[8];
+        
+        // 화면 좌표(0~1)를 A-Frame 좌표(-1.5 ~ 1.5)로 변환
+        const x = (indexTip.x - 0.5) * 3;
+        const y = -(indexTip.y - 0.5) * 2;
+        const z = -1; // 카메라 앞 1m 지점
+
+        magicBall.setAttribute('position', {x, y, z});
+        magicBall.setAttribute('visible', true);
+      } else {
+        magicBall.setAttribute('visible', false);
       }
-    </style>
-  </head>
+    });
 
-  <body>
-    <div id="ui">카메라 권한을 허용하세요! (조준점을 맞춰 클릭)</div>
-
-    <a-scene 
-      embedded 
-      arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;"
-      vr-mode-ui="enabled: false"
-      ar-logic>
-      
-      <a-light type="ambient" intensity="1.5"></a-light>
-
-      <a-ring id="reticle" radius-inner="0.04" radius-outer="0.06" color="#00FF00"></a-ring>
-
-      <a-entity camera look-controls="touchEnabled: false;"></a-entity>
-      
-    </a-scene>
-  </body>
+    // 카메라 시작
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({image: videoElement});
+      },
+      width: 1280,
+      height: 720
+    });
+    camera.start();
+  </script>
+</body>
 </html>
