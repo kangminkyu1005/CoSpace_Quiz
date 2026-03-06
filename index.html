@@ -1,26 +1,45 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; }
-    </style>
-  </head>
-  <body>
-    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist-assets/card.mind;" 
-             color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
-             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-      
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-sphere position="0 0 0.1" radius="0.5" color="#FFD700" 
-                  animation="property: position; to: 0 0 0.3; dur: 1000; dir: alternate; loop: true">
-        </a-sphere>
-      </a-entity>
-      
-    </a-scene>
-  </body>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindAR - 클릭 반응 피카츄</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.001; filterBeta: 10;" color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false" cursor="fuse: false; rayOrigin: mouse"
+    raycaster="objects: .clickable"> <a-assets>
+      <img id="pikaImage" src="./pikachu.png">
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-image id="pikachu" class="clickable" src="#pikaImage" width="1" height="1" position="0 0 0.1"
+        animation__click="property: position; from: 0 0 0.1; to: 0 0.5 0.1; dur: 300; dir: alternate; loop: 2; startEvents: click">
+      </a-image>
+    </a-entity>
+  </a-scene>
+
+  <script>
+    // 클릭 시 추가적인 동작(예: 콘솔 로그나 소리)을 넣고 싶을 때 사용
+    const pikaEl = document.querySelector('#pikachu');
+
+    pikaEl.addEventListener('click', () => {
+      console.log("피카츄를 클릭했습니다!");
+      // 여기에 소리 재생 코드를 추가할 수 있습니다.
+    });
+  </script>
+</body>
+
 </html>
