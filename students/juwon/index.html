@@ -1,1 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindAR + A-Frame WebAR</title>
+    
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+      body { margin: 0; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+
+    <a-scene 
+      mindar-image="imageTargetSrc: ./targets.mind; uiScanning: #example-scanning-overlay;" 
+      color-space="sRGB" 
+      renderer="colorManagement: true, physicallyCorrectLights" 
+      vr-mode-ui="enabled: false" 
+      device-orientation-permission-ui="enabled: false">
+      
+      <a-assets>
+        <a-asset-item id="monsterModel" src="./monster.glb"></a-asset-item>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-gltf-model 
+          src="#monsterModel" 
+          position="0 0 0" 
+          rotation="0 0 0" 
+          scale="0.1 0.1 0.1"
+          animation="property: rotation; to: 0 360 0; dur: 5000; easing: linear; loop: true">
+        </a-gltf-model>
+      </a-entity>
+
+      <a-light type="ambient" intensity="1"></a-light>
+      <a-light type="directional" position="0 10 5" intensity="0.8"></a-light>
+
+    </a-scene>
+
+  </body>
+</html>
 
