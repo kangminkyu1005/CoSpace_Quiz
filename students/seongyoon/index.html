@@ -33,7 +33,7 @@
 
     <a-entity id="target" mindar-image-target="targetIndex: 0">
       <a-gltf-model id="monster" src="#monsterModel" rotation="-90 -180 0" position="0 0 0" scale="1 1 1"
-        animation-mixer="clip: *; loop: repeat; timeScale: 1">
+        animation-mixer="clip: model_skeleton|001fight_b; loop: repeat; timeScale: 1">
       </a-gltf-model>
     </a-entity>
 
@@ -47,16 +47,16 @@
     window.addEventListener("DOMContentLoaded", () => {
       const model = document.querySelector("#monster");
 
-      model.addEventListener("model-loaded", () => {
+      model.addEventListener("model-loaded", (e) => {
         console.log("✅ 모델 로딩 완료");
 
-        const animations = model.object3D.animations;
+        const gltf = e.detail.model;
 
-        if (!animations || animations.length === 0) {
+        if (!gltf.animations || gltf.animations.length === 0) {
           console.log("❌ 애니메이션 없음");
         } else {
           console.log("🎬 애니메이션 목록:");
-          animations.forEach((clip, index) => {
+          gltf.animations.forEach((clip, index) => {
             console.log(index + ":", clip.name);
           });
         }
